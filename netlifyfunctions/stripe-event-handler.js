@@ -39,6 +39,16 @@ export const handler = async ({ body, headers }) => {
             break; 
           }
 
+          // Verify the user exists in Supabase Auth before proceeding
+          const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId);
+
+          if (authError || !authUser) {
+            console.error(`CRITICAL: User with ID ${userId} from Stripe metadata not found in Supabase Auth. Cannot update seller account.`, authError);
+            // We'll break here and return a 200 to Stripe to prevent retries for a user that doesn't exist.
+            break;
+          }
+          console.log(`User ${userId} verified in Supabase Auth. Proceeding with upsert.`);
+
           console.log(`Attempting to upsert profile for user ${userId} with Stripe account ${account.id}`);
 
           const { error } = await supabase
