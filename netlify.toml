@@ -6,6 +6,13 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# This rule ensures that requests to our serverless function are not
+# caught by the Single-Page App rule below.
+[[redirects]]
+  from = "/.netlify/functions/stripe-event-handler"
+  to = "/.netlify/functions/stripe-event-handler"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
