@@ -62,7 +62,7 @@ export const handler = async ({ body, headers }) => {
             });
 
           if (error) {
-            console.error('CRITICAL: Supabase upsert failed.', error);
+            console.error('CRITICAL: Supabase upsert failed. Error object as JSON:', JSON.stringify(error, null, 2));
             return {
               statusCode: 500,
               body: JSON.stringify({
