@@ -62,16 +62,7 @@ export const handler = async ({ body, headers }) => {
             });
 
           if (error) {
-            console.error('CRITICAL: Supabase upsert failed. See details below.');
-            console.error('typeof error:', typeof error);
-            console.error('constructor:', error.constructor ? error.constructor.name : 'N/A');
-            console.error('toString():', Object.prototype.toString.call(error));
-            console.error('Raw error object:', error);
-            console.error('Error message:', error.message);
-            console.error('Error details:', error.details);
-            console.error('Error code:', error.code);
-            console.error('Error hint:', error.hint);
-            console.error('Forced stringify:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+            console.error('CRITICAL: Supabase upsert failed.', error);
             return {
               statusCode: 500,
               body: JSON.stringify({
