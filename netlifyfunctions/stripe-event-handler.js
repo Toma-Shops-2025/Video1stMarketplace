@@ -80,6 +80,7 @@ export const handler = async ({ body, headers }) => {
         break;
 
       case 'payment_intent.succeeded':
+        console.log('Received payment_intent.succeeded event');
         const paymentIntent = stripeEvent.data.object;
         console.log('Full PaymentIntent object:', JSON.stringify(paymentIntent, null, 2));
         // Try to extract order info from metadata
@@ -128,7 +129,7 @@ export const handler = async ({ body, headers }) => {
     console.error('Failed to process webhook:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to process webhook' }),
+      body: JSON.stringify({ error: 'Failed to process webhook', details: error?.message }),
     };
   }
 }; 
