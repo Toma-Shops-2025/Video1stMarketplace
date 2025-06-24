@@ -107,7 +107,7 @@ export const handler = async ({ body, headers }) => {
             }
           ]);
           if (error) {
-            console.error('Failed to insert order in Supabase:', error);
+            console.error('Failed to insert order in Supabase:', JSON.stringify(error, null, 2));
           } else {
             console.log('Order created in Supabase for user', userId);
           }
