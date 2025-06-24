@@ -33,6 +33,7 @@ import FileManager from "./pages/FileManager";
 import SrcFiles from "./pages/SrcFiles";
 import CategoryPage from "./pages/CategoryPage";
 import FAQPage from "./pages/FAQPage";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const router = createBrowserRouter(
       <Route path="/src-files" element={<SrcFiles />} />
       <Route path="/category/:slug" element={<CategoryPage />} />
       <Route path="/faq" element={<FAQPage />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="*" element={<NotFound />} />
     </>
   ),
