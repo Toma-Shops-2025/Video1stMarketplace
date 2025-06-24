@@ -85,7 +85,7 @@ export const handler = async ({ body, headers }) => {
         // Try to extract order info from metadata
         const meta = paymentIntent.metadata || {};
         const userId = meta.user_id || meta.userId || null;
-        const items = meta.items ? JSON.parse(meta.items) : null;
+        const items = meta.orderItems ? JSON.parse(meta.orderItems) : null;
         const shippingInfo = meta.shipping_info ? JSON.parse(meta.shipping_info) : null;
         const billingInfo = meta.billing_info ? JSON.parse(meta.billing_info) : null;
         const totalAmount = paymentIntent.amount ? paymentIntent.amount / 100 : null;
