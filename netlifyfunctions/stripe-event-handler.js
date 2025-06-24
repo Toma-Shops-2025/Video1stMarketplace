@@ -80,9 +80,40 @@ export const handler = async ({ body, headers }) => {
         break;
 
       case 'payment_intent.succeeded':
-        // This is a placeholder for future logic
         const paymentIntent = stripeEvent.data.object;
-        console.log(`PaymentIntent for ${paymentIntent.amount} was successful!`);
+        console.log('Full PaymentIntent object:', JSON.stringify(paymentIntent, null, 2));
+        // Try to extract order info from metadata
+        const meta = paymentIntent.metadata || {};
+        const userId = meta.user_id || meta.userId || null;
+        const items = meta.items ? JSON.parse(meta.items) : null;
+        const shippingInfo = meta.shipping_info ? JSON.parse(meta.shipping_info) : null;
+        const billingInfo = meta.billing_info ? JSON.parse(meta.billing_info) : null;
+        const totalAmount = paymentIntent.amount ? paymentIntent.amount / 100 : null;
+        const sellerStripeAccountId = meta.seller_stripe_account_id || null;
+        const status = 'pending_delivery';
+
+        if (userId && items) {
+          const { error } = await supabase.from('orders').insert([
+            {
+              user_id: userId,
+              total_amount: totalAmount,
+              stripe_payment_intent_id: paymentIntent.id,
+              status,
+              shipping_info: shippingInfo,
+              billing_info: billingInfo,
+              items,
+              seller_stripe_account_id: sellerStripeAccountId,
+              payment_intent_id: paymentIntent.id,
+            }
+          ]);
+          if (error) {
+            console.error('Failed to insert order in Supabase:', error);
+          } else {
+            console.log('Order created in Supabase for user', userId);
+          }
+        } else {
+          console.error('Missing userId or items in PaymentIntent metadata. Order not created.');
+        }
         break;
         
       default:
