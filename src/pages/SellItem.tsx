@@ -333,13 +333,8 @@ const SellItem = () => {
         onConfirm={proceedToStripeOnboarding}
         onClose={() => setIsStripeModalOpen(false)}
         loading={isConnectingToStripe}
+        message="To offer shipping, you must connect your Stripe account. You'll be redirected to Stripe to set up payouts for shipped items. Once completed, you'll return here to finish your listing."
       />
-
-      {showStripeMessage && (
-        <div className="text-yellow-600 font-bold text-center mb-4">
-          To offer shipping, you must connect your Stripe account. You only need to do this once.
-        </div>
-      )}
     </>
   );
 };

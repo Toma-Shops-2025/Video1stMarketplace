@@ -37,17 +37,7 @@ const HeroSection: React.FC = () => {
       });
       return;
     }
-    // Check if user is Stripe-connected
-    const { data } = await supabase
-      .from('seller_accounts')
-      .select('stripe_account_id')
-      .eq('user_id', user.id)
-      .single();
-    if (!data || !data.stripe_account_id) {
-      navigate('/stripe-onboarding');
-    } else {
-      navigate('/sell');
-    }
+    navigate('/sell');
   };
 
   return (

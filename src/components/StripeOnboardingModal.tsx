@@ -14,6 +14,7 @@ interface StripeOnboardingModalProps {
   onClose: () => void;
   onConfirm: () => void;
   loading: boolean;
+  message?: string;
 }
 
 // NOTE: This modal is only triggered on form submit if Allow Shipping is selected and the seller is not Stripe onboarded.
@@ -22,6 +23,7 @@ const StripeOnboardingModal: React.FC<StripeOnboardingModalProps> = ({
   onClose,
   onConfirm,
   loading,
+  message,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -29,10 +31,14 @@ const StripeOnboardingModal: React.FC<StripeOnboardingModalProps> = ({
         <DialogHeader>
           <DialogTitle>Connect with Stripe to Sell</DialogTitle>
           <DialogDescription>
-            To sell items and receive payments for shipped orders, TomaShops partners with Stripe, a trusted payment processor.<br /><br />
-            <strong>Note:</strong> You only need a Stripe account to receive payments for shipped items. For local deals, you can get paid in person and do not need Stripe.<br /><br />
-            <strong>TomaShops does not charge any fees to buyers or sellers.</strong><br /><br />
-            You'll now be redirected to Stripe to set up your account. Once completed, you'll be brought right back to continue listing your item.
+            {message || (
+              <>
+                To sell items and receive payments for shipped orders, TomaShops partners with Stripe, a trusted payment processor.<br /><br />
+                <strong>Note:</strong> You only need a Stripe account to receive payments for shipped items. For local deals, you can get paid in person and do not need Stripe.<br /><br />
+                <strong>TomaShops does not charge any fees to buyers or sellers.</strong><br /><br />
+                You'll now be redirected to Stripe to set up your account. Once completed, you'll be brought right back to continue listing your item.
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

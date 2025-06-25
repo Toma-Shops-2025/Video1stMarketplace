@@ -41,21 +41,7 @@ const Header: React.FC = () => {
       });
       return;
     }
-    const { data } = await supabase
-      .from('seller_accounts')
-      .select('stripe_account_id')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!data || !data.stripe_account_id) {
-      toast({
-        title: 'Stripe Account Required',
-        description: 'Please connect your Stripe account to start selling.',
-        variant: 'destructive',
-      });
-    } else {
-      navigate('/sell');
-    }
+    navigate('/sell');
   };
 
   return (
