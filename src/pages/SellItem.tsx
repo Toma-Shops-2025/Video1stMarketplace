@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ const SellItem = () => {
   const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
   const [isConnectingToStripe, setIsConnectingToStripe] = useState(false);
   const [isInitialCheckComplete, setIsInitialCheckComplete] = useState(false);
+  const [showStripeMessage, setShowStripeMessage] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -39,68 +40,6 @@ const SellItem = () => {
     allowShipping: true,
     localPickupOnly: false
   });
-
-  useEffect(() => {
-    if (authLoading) {
-      return;
-    }
-
-    if (!user) {
-      setIsInitialCheckComplete(true);
-      return;
-    }
-
-    const checkStripeOnboarding = async () => {
-      const { data: account, error } = await supabase
-        .from('seller_accounts')
-        .select('payouts_enabled')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching seller account for Stripe check:', error);
-        setIsStripeConnected(false);
-      } else if (account && account.payouts_enabled) {
-        setIsStripeConnected(true);
-      } else {
-        setIsStripeConnected(false);
-        setTimeout(() => {
-            setIsStripeModalOpen(true);
-        }, 1500);
-      }
-      setIsInitialCheckComplete(true);
-    };
-
-    checkStripeOnboarding();
-  }, [user, authLoading]);
-
-  const proceedToStripeOnboarding = async () => {
-    if (!user) return;
-    setIsConnectingToStripe(true);
-    try {
-      const res = await fetch('/.netlify/functions/create-account-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, email: user.email }),
-      });
-      const result = await res.json();
-      if (result.accountLink) {
-        window.location.href = result.accountLink;
-      } else {
-        toast({
-          title: 'Error',
-          description: result.error || 'Failed to get Stripe onboarding link',
-          variant: 'destructive',
-        });
-        setIsConnectingToStripe(false);
-        setIsStripeModalOpen(false);
-      }
-    } catch (error) {
-      toast({ title: 'Error', description: 'Could not connect to Stripe.', variant: 'destructive' });
-      setIsConnectingToStripe(false);
-      setIsStripeModalOpen(false);
-    }
-  };
 
   const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
     setFormData(prev => ({ ...prev, location }));
@@ -132,6 +71,23 @@ const SellItem = () => {
       return;
     }
 
+    if (!formData.allowShipping && !formData.localPickupOnly) {
+      toast({
+        title: 'Shipping Option Required',
+        description: 'Please select at least one delivery option: Allow Shipping or Local Pickup Only.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // If Allow Shipping is selected and seller is NOT Stripe onboarded, show Stripe modal and message
+    if (formData.allowShipping && !isStripeConnected) {
+      setShowStripeMessage(true);
+      setIsStripeModalOpen(true);
+      return;
+    }
+
+    // If Allow Shipping is selected and seller IS Stripe onboarded, or if Local Pickup is selected, proceed as normal
     setLoading(true);
     try {
       const videoUrls = mediaUrls.filter(url => url.includes('product-videos'));
@@ -227,6 +183,34 @@ const SellItem = () => {
     }
   };
 
+  const proceedToStripeOnboarding = async () => {
+    if (!user) return;
+    setIsConnectingToStripe(true);
+    try {
+      const res = await fetch('/.netlify/functions/create-account-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, email: user.email }),
+      });
+      const result = await res.json();
+      if (result.accountLink) {
+        window.location.href = result.accountLink;
+      } else {
+        toast({
+          title: 'Error',
+          description: result.error || 'Failed to get Stripe onboarding link',
+          variant: 'destructive',
+        });
+        setIsConnectingToStripe(false);
+        setIsStripeModalOpen(false);
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Could not connect to Stripe.', variant: 'destructive' });
+      setIsConnectingToStripe(false);
+      setIsStripeModalOpen(false);
+    }
+  };
+
   if (authLoading) {
     return (
       <AppLayout>
@@ -284,13 +268,13 @@ const SellItem = () => {
                     <div className="space-y-2">
                       <Label htmlFor="category">Category</Label>
                       <Select value={formData.category} onValueChange={value => setFormData({ ...formData, category: value })}>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full min-w-[200px]">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           {categories.map((cat) => (
-                            <SelectItem key={cat.slug} value={cat.slug}>
-                              {cat.name}
+                            <SelectItem key={cat.slug} value={cat.slug} className="whitespace-normal break-words">
+                              {cat.title}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -345,11 +329,17 @@ const SellItem = () => {
 
       {!user && <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />}
       <StripeOnboardingModal
-        isOpen={isStripeModalOpen && isInitialCheckComplete && !isStripeConnected}
-        isConnecting={isConnectingToStripe}
+        isOpen={isStripeModalOpen && !isStripeConnected}
         onConfirm={proceedToStripeOnboarding}
         onClose={() => setIsStripeModalOpen(false)}
+        loading={isConnectingToStripe}
       />
+
+      {showStripeMessage && (
+        <div className="text-yellow-600 font-bold text-center mb-4">
+          To offer shipping, you must connect your Stripe account. You only need to do this once.
+        </div>
+      )}
     </>
   );
 };

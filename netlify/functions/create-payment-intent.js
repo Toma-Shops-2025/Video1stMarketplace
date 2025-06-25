@@ -2,7 +2,7 @@ const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const PLATFORM_FEE_PERCENTAGE = 0.05; // 5% platform fee
+const PLATFORM_FEE_PERCENTAGE = 0; // 0% platform fee
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -63,6 +63,25 @@ exports.handler = async (event) => {
     const totalAmountInCents = Math.round(totalAmount * 100);
 
     const applicationFeeInCents = Math.round(totalAmountInCents * PLATFORM_FEE_PERCENTAGE);
+
+    // Check if all items are local-only
+    const allLocal = items.every(item => item.product.local_pickup_only === true);
+    if (allLocal) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'No payment needed for local transactions.' }),
+        headers: { 'Content-Type': 'application/json' }
+      };
+    }
+    // Only proceed with Stripe logic if at least one item has allow_shipping === true
+    const anyShipped = items.some(item => item.product.allow_shipping === true);
+    if (!anyShipped) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'No shippable items found in cart.' }),
+        headers: { 'Content-Type': 'application/json' }
+      };
+    }
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalAmountInCents,

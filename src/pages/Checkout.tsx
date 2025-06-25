@@ -18,29 +18,57 @@ const Checkout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const [sellerStripeAccountId, setSellerStripeAccountId] = useState<string | null>(null);
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = 5.99;
   const tax = total * 0.08;
   const finalTotal = total + shipping + tax;
 
+  // Update helpers to use allow_shipping and local_pickup_only
+  const allLocal = cartItems.every(item => item.product.local_pickup_only === true);
+  const anyShipped = cartItems.some(item => item.product.allow_shipping === true);
+
+  // Add a fallback for invalid delivery options
+  const invalidDelivery = cartItems.some(item => !item.product.allow_shipping && !item.product.local_pickup_only);
+
   useEffect(() => {
-    // Fetch client secret from backend when cartItems change
-    const fetchClientSecret = async () => {
-      // TODO: Replace with your backend endpoint to create a PaymentIntent
-      const response = await fetch('/.netlify/functions/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: finalTotal,
-          cartItems
-        })
-      });
-      const data = await response.json();
-      setClientSecret(data.clientSecret);
-    };
-    if (cartItems.length > 0) fetchClientSecret();
-  }, [cartItems, finalTotal]);
+    // Only call backend if there is at least one shipped item
+    if (cartItems.length === 0) {
+      setClientSecret(null);
+      setSellerStripeAccountId(null);
+      setStripeError(null);
+      return;
+    }
+    if (anyShipped) {
+      const fetchClientSecret = async () => {
+        const response = await fetch('/.netlify/functions/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: finalTotal,
+            cartItems
+          })
+        });
+        const data = await response.json();
+        if (data.error) {
+          setStripeError(data.error);
+          setClientSecret(null);
+          setSellerStripeAccountId(null);
+        } else {
+          setClientSecret(data.clientSecret);
+          setSellerStripeAccountId(data.sellerStripeAccountId);
+          setStripeError(null);
+        }
+      };
+      fetchClientSecret();
+    } else {
+      setClientSecret(null);
+      setSellerStripeAccountId(null);
+      setStripeError(null);
+    }
+  }, [cartItems, finalTotal, anyShipped]);
 
   const handleStripeSuccess = () => {
     setPaymentSuccess(true);
@@ -58,6 +86,23 @@ const Checkout = () => {
     clearCart();
     navigate('/profile?tab=orders');
   };
+
+  if (invalidDelivery) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 bg-gray-50 flex items-center justify-center">
+          <Card className="w-full max-w-md mx-4">
+            <CardContent className="p-6 text-center">
+              <p className="text-red-600 mb-4 font-bold">This item is not available for purchase. Please contact the seller.</p>
+              <Button onClick={() => navigate('/')}>Return to Home</Button>
+            </CardContent>
+          </Card>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -150,7 +195,15 @@ const Checkout = () => {
                 </CardContent>
               </Card>
 
-              {clientSecret && !paymentSuccess && (
+              {stripeError && (
+                <div className="text-red-600 font-bold text-center mb-4">{stripeError}</div>
+              )}
+              {allLocal && !paymentSuccess && (
+                <Button className="w-full" onClick={handlePlaceOrder} disabled={isProcessing}>
+                  Mark as Paid (Local)
+                </Button>
+              )}
+              {anyShipped && clientSecret && sellerStripeAccountId && !paymentSuccess && !stripeError && (
                 <StripePayment
                   clientSecret={clientSecret}
                   amount={finalTotal}
@@ -193,13 +246,15 @@ const Checkout = () => {
                     <span>Total</span>
                     <span>${finalTotal.toFixed(2)}</span>
                   </div>
-                  <Button 
-                    className="w-full" 
-                    onClick={handlePlaceOrder}
-                    disabled={isProcessing}
-                  >
-                    {isProcessing ? 'Processing...' : 'Place Order'}
-                  </Button>
+                  {allLocal && (
+                    <Button 
+                      className="w-full" 
+                      onClick={handlePlaceOrder}
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? 'Processing...' : 'Place Order'}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </div>

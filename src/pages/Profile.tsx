@@ -12,7 +12,6 @@ import { toast } from '@/components/ui/use-toast';
 import ProductGrid from '@/components/ProductGrid';
 import { useAppContext } from '@/contexts/AppContext';
 import supabase from '@/lib/supabase';
-import StripeOnboardingModal from '@/components/StripeOnboardingModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Product } from '@/types'; // Assuming you have a types file
 
@@ -20,8 +19,6 @@ const Profile = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showMessagesModal, setShowMessagesModal] = useState(false);
-  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
-  const [isConnectingToStripe, setIsConnectingToStripe] = useState(false);
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const { likedProducts } = useAppContext();
@@ -161,18 +158,6 @@ const Profile = () => {
       setShowAuthModal(true);
       return;
     }
-    // Check if user has a connected Stripe account
-    const { data, error } = await supabase
-      .from('seller_accounts')
-      .select('stripe_account_id')
-      .eq('user_id', user.id)
-      .single();
-    if (!data || !data.stripe_account_id) {
-      // Not connected: prompt onboarding
-      setIsStripeModalOpen(true);
-      return;
-    }
-    // Connected: proceed to create listing
     navigate('/sell');
   };
 
@@ -190,35 +175,6 @@ const Profile = () => {
       title: 'Signed out',
       description: 'You have been successfully signed out.',
     });
-  };
-
-  const handleStripeConnect = async () => {
-    if (!user) return;
-    setIsStripeModalOpen(true);
-  };
-
-  const proceedToStripeOnboarding = async () => {
-    if (!user) return;
-    setIsConnectingToStripe(true);
-    try {
-      const res = await fetch('/.netlify/functions/create-account-link', {
-        method: 'POST',
-        body: JSON.stringify({ userId: user.id, email: user.email }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await res.json();
-      if (data.accountLink) {
-        window.location.href = data.accountLink;
-      } else {
-        toast({ title: 'Error', description: data.error || 'Failed to get Stripe onboarding link', variant: 'destructive' });
-        setIsConnectingToStripe(false);
-        setIsStripeModalOpen(false);
-      }
-    } catch (error) {
-      toast({ title: 'Error', description: 'Could not connect to Stripe.', variant: 'destructive' });
-      setIsConnectingToStripe(false);
-      setIsStripeModalOpen(false);
-    }
   };
 
   const handleConfirmDelivery = async (order: any) => {
@@ -337,14 +293,6 @@ const Profile = () => {
                     </Button>
                   )}
                 </div>
-                {user && (
-                  <button
-                    onClick={handleStripeConnect}
-                    className="bg-blue-600 text-white px-4 py-2 rounded mt-4"
-                  >
-                    Connect with Stripe
-                  </button>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -468,12 +416,6 @@ const Profile = () => {
       <MessagesModal
         isOpen={showMessagesModal}
         onClose={() => setShowMessagesModal(false)}
-      />
-      <StripeOnboardingModal
-        isOpen={isStripeModalOpen}
-        onClose={() => setIsStripeModalOpen(false)}
-        onConfirm={proceedToStripeOnboarding}
-        loading={isConnectingToStripe}
       />
     </AppLayout>
   );

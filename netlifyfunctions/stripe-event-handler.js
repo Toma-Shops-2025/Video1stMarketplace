@@ -11,12 +11,18 @@ const supabase = createClient(
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-export const handler = async ({ body, headers }) => {
-  const sig = headers['stripe-signature'];
+export const handler = async (event) => {
+  // Netlify passes the event object with body, headers, and isBase64Encoded
+  let rawBody = event.body;
+  if (event.isBase64Encoded) {
+    rawBody = Buffer.from(event.body, 'base64').toString('utf8');
+  }
+
+  const sig = event.headers['stripe-signature'];
   let stripeEvent;
 
   try {
-    stripeEvent = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+    stripeEvent = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     console.error(`Webhook signature verification failed.`, err.message);
     return {
