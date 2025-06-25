@@ -51,7 +51,7 @@ const Header: React.FC = () => {
       toast({
         title: 'Stripe Onboarding Required',
         description: 'You only need to do this once. It is very quick and ensures you can get paid for any shipped items you sell.',
-        variant: 'info',
+        variant: 'default',
       });
       const res = await fetch('/.netlify/functions/stripe-onboard', {
         method: 'POST',
