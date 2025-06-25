@@ -115,7 +115,9 @@ const FAQPage: React.FC = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800 mb-4">🔹 How do I contact customer support?</h2>
             <p className="text-gray-700 leading-relaxed">
-             You can email us anytime at support@tomashops.com or call our 24/7 helpline at 1-800-TOMASHOPS.
+             You can email us anytime at support@tomashops.com or call our 24/7 helpline at
+             <span style={{ fontSize: '0.85em', display: 'block', color: '#888' }}>1-954-866-2746</span>
+             <strong>1-954-TOMASHOPS</strong>.
             </p>
           </div>
 
