@@ -22,6 +22,10 @@ export default function Map({
 }: MapProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
+  // Defensive fallback for height/width
+  const safeHeight = typeof height === 'string' && height.match(/^\d+(px|%)$/) ? height : '400px';
+  const safeWidth = typeof width === 'string' && width.match(/^\d+(px|%)$/) ? width : '100%';
+
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
@@ -42,7 +46,7 @@ export default function Map({
   return (
     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
       <GoogleMap
-        mapContainerStyle={{ height, width }}
+        mapContainerStyle={{ height: safeHeight, width: safeWidth }}
         center={center}
         zoom={zoom}
         onLoad={onLoad}

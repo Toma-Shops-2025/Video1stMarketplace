@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -197,6 +197,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ isOpen, onClose }) => {
             <span>Messages</span>
             <Button size="sm" variant="outline" onClick={registerForPushNotifications} className="ml-4">Enable Push Notifications</Button>
           </DialogTitle>
+          <DialogDescription>View and send messages to other users.</DialogDescription>
         </DialogHeader>
         
         <div className="flex h-full">

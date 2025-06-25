@@ -80,7 +80,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ onLocationSelect
         <Button type="button" onClick={handleAddressSearch}>Search</Button>
       </div>
       
-      <div className="h-[400px] w-full rounded-lg overflow-hidden border">
+      <div className="h-[400px] w-full rounded-lg overflow-hidden border" style={{ minHeight: 400 }}>
         <Map
           {...viewState}
           onMove={evt => setViewState(evt.viewState)}

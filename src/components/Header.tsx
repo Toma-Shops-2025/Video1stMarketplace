@@ -14,14 +14,11 @@ import Logo from './Logo';
 import { ShoppingCart, Menu } from 'lucide-react';
 import supabase from '@/lib/supabase';
 import { toast } from './ui/use-toast';
-import StripeOnboardingModal from './StripeOnboardingModal';
 import { useTheme } from 'next-themes';
 
 const Header: React.FC = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
-  const [isConnectingToStripe, setIsConnectingToStripe] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -30,34 +27,6 @@ const Header: React.FC = () => {
       await signOut();
     } catch (error) {
       console.error('Error signing out:', error);
-    }
-  };
-
-  const proceedToStripeOnboarding = async () => {
-    if (!user) return;
-    setIsConnectingToStripe(true);
-    try {
-      const res = await fetch('/.netlify/functions/create-account-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, email: user.email }),
-      });
-      const result = await res.json();
-      if (result.accountLink) {
-        window.location.href = result.accountLink;
-      } else {
-        toast({
-          title: 'Error',
-          description: result.error || 'Failed to get Stripe onboarding link',
-          variant: 'destructive',
-        });
-        setIsConnectingToStripe(false);
-        setIsStripeModalOpen(false);
-      }
-    } catch (error) {
-      toast({ title: 'Error', description: 'Could not connect to Stripe.', variant: 'destructive' });
-      setIsConnectingToStripe(false);
-      setIsStripeModalOpen(false);
     }
   };
 
@@ -79,7 +48,11 @@ const Header: React.FC = () => {
       .single();
 
     if (!data || !data.stripe_account_id) {
-      setIsStripeModalOpen(true);
+      toast({
+        title: 'Stripe Account Required',
+        description: 'Please connect your Stripe account to start selling.',
+        variant: 'destructive',
+      });
     } else {
       navigate('/sell');
     }
@@ -163,12 +136,6 @@ const Header: React.FC = () => {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-      />
-      <StripeOnboardingModal
-        isOpen={isStripeModalOpen}
-        onClose={() => setIsStripeModalOpen(false)}
-        onConfirm={proceedToStripeOnboarding}
-        loading={isConnectingToStripe}
       />
     </>
   );

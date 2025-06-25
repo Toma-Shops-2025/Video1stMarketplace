@@ -7,15 +7,12 @@ import Logo from './Logo';
 import { useAuth } from '@/contexts/AuthContext';
 import supabase from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
-import StripeOnboardingModal from './StripeOnboardingModal';
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
   const { user } = useAuth();
-  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
-  const [isConnectingToStripe, setIsConnectingToStripe] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,34 +25,6 @@ const HeroSection: React.FC = () => {
   const handleVideoFeedClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate('/feed');
-  };
-
-  const proceedToStripeOnboarding = async () => {
-    if (!user) return;
-    setIsConnectingToStripe(true);
-    try {
-      const res = await fetch('/.netlify/functions/create-account-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, email: user.email }),
-      });
-      const result = await res.json();
-      if (result.accountLink) {
-        window.location.href = result.accountLink;
-      } else {
-        toast({
-          title: 'Error',
-          description: result.error || 'Failed to get Stripe onboarding link',
-          variant: 'destructive',
-        });
-        setIsConnectingToStripe(false);
-        setIsStripeModalOpen(false);
-      }
-    } catch (error) {
-      toast({ title: 'Error', description: 'Could not connect to Stripe.', variant: 'destructive' });
-      setIsConnectingToStripe(false);
-      setIsStripeModalOpen(false);
-    }
   };
 
   const handleSellClick = async (e: React.MouseEvent) => {
@@ -75,7 +44,7 @@ const HeroSection: React.FC = () => {
       .eq('user_id', user.id)
       .single();
     if (!data || !data.stripe_account_id) {
-      setIsStripeModalOpen(true);
+      navigate('/stripe-onboarding');
     } else {
       navigate('/sell');
     }
@@ -146,12 +115,6 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
       </section>
-      <StripeOnboardingModal
-        isOpen={isStripeModalOpen}
-        onClose={() => setIsStripeModalOpen(false)}
-        onConfirm={proceedToStripeOnboarding}
-        loading={isConnectingToStripe}
-      />
     </>
   );
 };

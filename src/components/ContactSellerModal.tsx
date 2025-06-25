@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -83,6 +83,7 @@ const ContactSellerModal: React.FC<ContactSellerModalProps> = ({
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Contact Seller</DialogTitle>
+            <DialogDescription>Send a message to the seller about this item.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
