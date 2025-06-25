@@ -323,6 +323,12 @@ const ProductDetail: React.FC = () => {
                     <p className="text-sm mt-1">{product.description}</p>
                   </div>
 
+                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-4">
+                    <strong>How to Buy:</strong><br />
+                    <span className="block mt-1">• <b>Add to Cart</b>: Use this if you want the item shipped to you. You'll pay securely online and the seller will ship it.</span>
+                    <span className="block">• <b>Contact Seller</b>: Use this if you want to meet locally and pay in person.</span>
+                  </div>
+
                   <div className="flex gap-2 pt-4">
                     <Button 
                       onClick={() => addToCart(product)}

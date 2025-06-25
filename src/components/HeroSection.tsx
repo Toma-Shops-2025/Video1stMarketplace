@@ -37,6 +37,31 @@ const HeroSection: React.FC = () => {
       });
       return;
     }
+    // Check if user is Stripe-connected
+    const { data } = await supabase
+      .from('seller_accounts')
+      .select('stripe_account_id')
+      .eq('user_id', user.id)
+      .single();
+    if (!data || !data.stripe_account_id) {
+      toast({
+        title: 'Stripe Onboarding Required',
+        description: 'You only need to do this once. It is very quick and ensures you can get paid for any shipped items you sell.',
+        variant: 'info',
+      });
+      const res = await fetch('/.netlify/functions/stripe-onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, email: user.email }),
+      });
+      const result = await res.json();
+      if (result.accountLink) {
+        window.location.href = result.accountLink;
+      } else {
+        toast({ title: 'Error', description: result.error || 'Failed to get Stripe onboarding link', variant: 'destructive' });
+      }
+      return;
+    }
     navigate('/sell');
   };
 

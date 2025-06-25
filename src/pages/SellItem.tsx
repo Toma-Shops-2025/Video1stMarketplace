@@ -37,8 +37,6 @@ const SellItem = () => {
     category: '',
     condition: 'new',
     location: null as { lat: number; lng: number; address: string } | null,
-    allowShipping: true,
-    localPickupOnly: false
   });
 
   const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
@@ -71,17 +69,8 @@ const SellItem = () => {
       return;
     }
 
-    if (!formData.allowShipping && !formData.localPickupOnly) {
-      toast({
-        title: 'Shipping Option Required',
-        description: 'Please select at least one delivery option: Allow Shipping or Local Pickup Only.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
     // If Allow Shipping is selected and seller is NOT Stripe onboarded, show Stripe modal and message
-    if (formData.allowShipping && !isStripeConnected) {
+    if (!isStripeConnected) {
       setShowStripeMessage(true);
       setIsStripeModalOpen(true);
       return;
@@ -131,8 +120,6 @@ const SellItem = () => {
         location_lat: formData.location.lat,
         location_lng: formData.location.lng,
         location_address: formData.location.address,
-        allow_shipping: formData.allowShipping,
-        local_pickup_only: formData.localPickupOnly
       };
 
       try {
@@ -163,8 +150,6 @@ const SellItem = () => {
           category: '', 
           condition: 'new',
           location: null,
-          allowShipping: true,
-          localPickupOnly: false
         });
         setMediaUrls([]);
       } catch (error) {
@@ -302,18 +287,6 @@ const SellItem = () => {
                   <div className="space-y-2">
                     <Label>Location</Label>
                     <LocationPicker onLocationSelect={handleLocationSelect} />
-                  </div>
-
-                  {/* Shipping Options */}
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Switch id="allow-shipping" checked={formData.allowShipping} onCheckedChange={checked => setFormData({ ...formData, allowShipping: checked, localPickupOnly: !checked })} />
-                      <Label htmlFor="allow-shipping">Allow Shipping</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch id="local-pickup" checked={formData.localPickupOnly} onCheckedChange={checked => setFormData({ ...formData, localPickupOnly: checked, allowShipping: !checked })} />
-                      <Label htmlFor="local-pickup">Local Pickup Only</Label>
-                    </div>
                   </div>
 
                   {/* Submit Button */}
