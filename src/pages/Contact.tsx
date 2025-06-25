@@ -15,7 +15,7 @@ const Contact: React.FC = () => {
         <p className="text-xl text-gray-600 mb-8">Get in touch with our support team</p>
         <div className="bg-white p-8 rounded-lg shadow">
           <p className="text-gray-600 mb-4">Email: support@tomashops.com</p>
-          <p className="text-gray-600 mb-4">Phone: 1-800-TOMASHOP</p>
+          <p className="text-gray-600 mb-4">Phone: 1-954-TOMASHOPS <small className="ml-2 text-xs text-gray-400">1-954-866-2746</small></p>
           <p className="text-gray-600">We're here to help 24/7!</p>
         </div>
       </div>

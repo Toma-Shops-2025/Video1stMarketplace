@@ -79,7 +79,7 @@ const Shipping: React.FC = () => {
 
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
-            <p className="text-gray-700">For shipping questions or concerns, please contact us at shipping@tomashops.com or call 1-800-TOMASHOP.</p>
+            <p className="text-gray-700">For shipping questions or concerns, please contact us at shipping@tomashops.com or call 1-954-TOMASHOPS <small className="ml-2 text-xs text-gray-400">1-954-866-2746</small>.</p>
           </div>
         </div>
       </div>
