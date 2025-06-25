@@ -48,7 +48,7 @@ const HowItWorksSection = () => {
 
         <div className="relative w-full max-w-4xl mx-auto mb-12" style={{ aspectRatio: '16/9' }}>
           <iframe
-            src="https://video.pictory.ai/embed/1749642227566/202506111229148861HY0KIwPRd81taZ"
+            src="https://www.youtube.com/embed/ySoEyBSklp4"
             title="TomaShops Video 1st Marketplace"
             className="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
