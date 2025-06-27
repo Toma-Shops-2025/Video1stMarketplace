@@ -18,12 +18,13 @@ exports.handler = async (event) => {
     const account = await stripe.accounts.create({
       type: 'express',
       email,
+      metadata: { userId },
     });
     // Create an onboarding link
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: 'https://tomashops.com/profile',
-      return_url: 'https://tomashops.com/profile',
+      refresh_url: 'https://tomashops.com/sell',
+      return_url: 'https://tomashops.com/sell',
       type: 'account_onboarding',
     });
     return {

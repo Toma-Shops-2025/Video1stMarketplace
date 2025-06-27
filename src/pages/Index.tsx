@@ -20,8 +20,8 @@ const Index: React.FC = () => {
       }
       const { data, error } = await supabase
         .from('admins')
-        .select('email')
-        .eq('email', user.email)
+        .select('id')
+        .eq('id', user.id)
         .single();
       setIsAdmin(!!data && !error);
     };

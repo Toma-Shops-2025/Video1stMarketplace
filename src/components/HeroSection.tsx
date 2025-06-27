@@ -7,12 +7,14 @@ import Logo from './Logo';
 import { useAuth } from '@/contexts/AuthContext';
 import supabase from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
+import { useHandleStartSelling } from '@/utils/handleStartSelling';
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
   const { user } = useAuth();
+  const handleStartSelling = useHandleStartSelling();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,9 +124,9 @@ const HeroSection: React.FC = () => {
                 variant="outline" 
                 size="lg" 
                 className="px-8 py-3"
-                onClick={handleSellClick}
+                onClick={handleStartSelling}
               >
-                Start Selling Now
+                Start Selling
               </Button>
             </div>
           </div>

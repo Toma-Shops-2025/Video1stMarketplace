@@ -14,6 +14,7 @@ import { useAppContext } from '@/contexts/AppContext';
 import supabase from '@/lib/supabase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Product } from '@/types'; // Assuming you have a types file
+import { useHandleStartSelling } from '@/utils/handleStartSelling';
 
 const Profile = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -31,6 +32,7 @@ const Profile = () => {
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
   const [hasConversations, setHasConversations] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const handleStartSelling = useHandleStartSelling();
 
   useEffect(() => {
     let mounted = true;
@@ -137,8 +139,8 @@ const Profile = () => {
       }
       const { data, error } = await supabase
         .from('admins')
-        .select('email')
-        .eq('email', user.email)
+        .select('id')
+        .eq('id', user.id)
         .single();
       setIsAdmin(!!data && !error);
     };
@@ -337,7 +339,7 @@ const Profile = () => {
                 <div className="text-center py-8">
                   <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">No active listings</p>
-                  <Button onClick={handleCreateListing}>Create Listing</Button>
+                  <Button onClick={handleStartSelling}>Start Selling</Button>
                 </div>
               ) : (
                 <div className="py-2">

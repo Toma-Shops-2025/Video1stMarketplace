@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ const SellItem = () => {
   const [isConnectingToStripe, setIsConnectingToStripe] = useState(false);
   const [isInitialCheckComplete, setIsInitialCheckComplete] = useState(false);
   const [showStripeMessage, setShowStripeMessage] = useState(false);
+  const [syncingStripe, setSyncingStripe] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -196,6 +197,49 @@ const SellItem = () => {
     }
   };
 
+  // Poll for payouts_enabled after returning from Stripe onboarding
+  useEffect(() => {
+    if (!user) return;
+    // Check if we just returned from Stripe (look for /sell in location or a query param)
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromStripe = urlParams.get('fromStripe');
+    if (fromStripe === '1' || document.referrer.includes('stripe.com')) {
+      setSyncingStripe(true);
+      let attempts = 0;
+      const maxAttempts = 10;
+      const interval = setInterval(async () => {
+        const { data } = await supabase
+          .from('seller_accounts')
+          .select('stripe_account_id, payouts_enabled')
+          .eq('user_id', user.id)
+          .single();
+        if (data && data.stripe_account_id && data.payouts_enabled) {
+          setIsStripeConnected(true);
+          setSyncingStripe(false);
+          clearInterval(interval);
+        } else if (attempts >= maxAttempts) {
+          setSyncingStripe(false);
+          clearInterval(interval);
+        }
+        attempts++;
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  // On mount, check if user is already Stripe connected
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from('seller_accounts')
+        .select('stripe_account_id, payouts_enabled')
+        .eq('user_id', user.id)
+        .single();
+      setIsStripeConnected(!!(data && data.stripe_account_id && data.payouts_enabled));
+    })();
+  }, [user]);
+
   if (authLoading) {
     return (
       <AppLayout>
@@ -225,75 +269,82 @@ const SellItem = () => {
                 <CardTitle>Create a New Listing</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Title Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
-                    <Input id="title" placeholder="e.g., Brand New Gaming Laptop" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required />
+                {syncingStripe ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                    <p className="text-gray-700">Syncing your Stripe account... Please wait a moment.</p>
                   </div>
-
-                  {/* Description Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" placeholder="Describe your item in detail" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} required />
-                  </div>
-                  
-                  {/* Media Uploader */}
-                  <div className="space-y-2">
-                    <Label>Media (Videos & Images)</Label>
-                    <MediaUpload onUpload={urls => setMediaUrls(urls)} />
-                  </div>
-
-                  {/* Price and Category Inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Title Input */}
                     <div className="space-y-2">
-                      <Label htmlFor="price">Price ($)</Label>
-                      <Input id="price" type="number" placeholder="e.g., 99.99" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required />
+                      <Label htmlFor="title">Title</Label>
+                      <Input id="title" placeholder="e.g., Brand New Gaming Laptop" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required />
                     </div>
+
+                    {/* Description Input */}
                     <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select value={formData.category} onValueChange={value => setFormData({ ...formData, category: value })}>
-                        <SelectTrigger className="w-full min-w-[200px]">
-                          <SelectValue placeholder="Select a category" />
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea id="description" placeholder="Describe your item in detail" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} required />
+                    </div>
+                    
+                    {/* Media Uploader */}
+                    <div className="space-y-2">
+                      <Label>Media (Videos & Images)</Label>
+                      <MediaUpload onUpload={urls => setMediaUrls(urls)} />
+                    </div>
+
+                    {/* Price and Category Inputs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Price ($)</Label>
+                        <Input id="price" type="number" placeholder="e.g., 99.99" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Select value={formData.category} onValueChange={value => setFormData({ ...formData, category: value })}>
+                          <SelectTrigger className="w-full min-w-[200px]">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60 overflow-y-auto">
+                            {categories.map((cat) => (
+                              <SelectItem key={cat.slug} value={cat.slug} className="whitespace-normal break-words">
+                                {cat.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Condition Input */}
+                    <div className="space-y-2">
+                      <Label htmlFor="condition">Condition</Label>
+                      <Select value={formData.condition} onValueChange={value => setFormData({ ...formData, condition: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select condition" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-60 overflow-y-auto">
-                          {categories.map((cat) => (
-                            <SelectItem key={cat.slug} value={cat.slug} className="whitespace-normal break-words">
-                              {cat.title}
-                            </SelectItem>
-                          ))}
+                        <SelectContent>
+                          <SelectItem value="new">New</SelectItem>
+                          <SelectItem value="used-like-new">Used (like new)</SelectItem>
+                          <SelectItem value="used-good">Used (good)</SelectItem>
+                          <SelectItem value="used-fair">Used (fair)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
+                    
+                    {/* Location Picker */}
+                    <div className="space-y-2">
+                      <Label>Location</Label>
+                      <LocationPicker onLocationSelect={handleLocationSelect} />
+                    </div>
 
-                  {/* Condition Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="condition">Condition</Label>
-                    <Select value={formData.condition} onValueChange={value => setFormData({ ...formData, condition: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select condition" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="used-like-new">Used (like new)</SelectItem>
-                        <SelectItem value="used-good">Used (good)</SelectItem>
-                        <SelectItem value="used-fair">Used (fair)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {/* Location Picker */}
-                  <div className="space-y-2">
-                    <Label>Location</Label>
-                    <LocationPicker onLocationSelect={handleLocationSelect} />
-                  </div>
-
-                  {/* Submit Button */}
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Submitting...' : 'Create Listing'}
-                  </Button>
-                </form>
+                    {/* Submit Button */}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? 'Submitting...' : 'Create Listing'}
+                    </Button>
+                  </form>
+                )}
               </CardContent>
             </Card>
           </div>

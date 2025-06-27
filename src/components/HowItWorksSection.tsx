@@ -3,38 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import supabase from '@/lib/supabase';
+import { useHandleStartSelling } from '@/utils/handleStartSelling';
 
 const HowItWorksSection = () => {
   const { user } = useAuth();
-
-  const handleStartSelling = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!user) {
-      alert('Please sign in to start selling.');
-      return;
-    }
-    const { data } = await supabase
-      .from('seller_accounts')
-      .select('stripe_account_id')
-      .eq('user_id', user.id)
-      .single();
-    if (!data || !data.stripe_account_id) {
-      const res = await fetch('/.netlify/functions/stripe-onboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, email: user.email }),
-      });
-      const result = await res.json();
-      if (result.accountLink) {
-        window.location.href = result.accountLink;
-      } else {
-        alert(result.error || 'Failed to get Stripe onboarding link');
-      }
-      return;
-    }
-    // Already connected
-    window.location.href = '/sell';
-  };
+  const handleStartSelling = useHandleStartSelling();
 
   return (
     <section className="py-16 bg-gray-50">

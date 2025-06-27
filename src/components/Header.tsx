@@ -15,12 +15,14 @@ import { ShoppingCart, Menu } from 'lucide-react';
 import supabase from '@/lib/supabase';
 import { toast } from './ui/use-toast';
 import { useTheme } from 'next-themes';
+import { useHandleStartSelling } from '@/utils/handleStartSelling';
 
 const Header: React.FC = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const navigate = useNavigate();
+  const handleStartSelling = useHandleStartSelling();
 
   const handleSignOut = async () => {
     try {
@@ -84,7 +86,7 @@ const Header: React.FC = () => {
           {/* Dropdown menu */}
           {navOpen && (
             <div className="absolute top-14 left-2 bg-white shadow-lg rounded-lg py-2 px-4 z-50 min-w-[180px]">
-              <a href="/sell" className="block py-2 hover:text-blue-600" onClick={handleSellHeaderClick}>Sell Items</a>
+              <a href="/sell" className="block py-2 hover:text-blue-600" onClick={handleStartSelling}>Start Selling</a>
               <Link to="/feed" className="block py-2 hover:text-blue-600" onClick={() => setNavOpen(false)}>Video Feed</Link>
               <Link to="/" className="block py-2 hover:text-blue-600" onClick={() => setNavOpen(false)}>Home</Link>
               <Link to="/contact" className="block py-2 hover:text-blue-600" onClick={() => setNavOpen(false)}>Contact Us</Link>
