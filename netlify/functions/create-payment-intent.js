@@ -43,9 +43,9 @@ exports.handler = async (event) => {
     const sellerId = firstSellerId;
 
     const { data: sellerProfile, error: sellerError } = await supabase
-      .from('profiles')
+      .from('seller_accounts')
       .select('stripe_account_id')
-      .eq('id', sellerId)
+      .eq('user_id', sellerId)
       .single();
 
     if (sellerError || !sellerProfile?.stripe_account_id) {
