@@ -41,7 +41,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ onUpload, maxFiles = 5
         const safeName = sanitizeFileName(file.name);
         const fileName = `${Math.random()}_${safeName}`;
         const isVideo = file.type.startsWith('video/');
-        const bucket = isVideo ? 'product-videos' : 'product-images';
+        const bucket = isVideo ? 'listing-videos' : 'listing-images';
 
         const { error: uploadError, data } = await supabase.storage
           .from(bucket)

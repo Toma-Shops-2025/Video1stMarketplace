@@ -123,7 +123,7 @@ const ProductDetail: React.FC = () => {
       return imagePath;
     }
     const { data } = supabase.storage
-      .from('product-images')
+      .from('listing-images')
       .getPublicUrl(imagePath);
     return data.publicUrl;
   };
@@ -133,7 +133,7 @@ const ProductDetail: React.FC = () => {
       return videoPath;
     }
     const { data } = supabase.storage
-      .from('product-videos')
+      .from('listing-videos')
       .getPublicUrl(videoPath);
     return data.publicUrl;
   };

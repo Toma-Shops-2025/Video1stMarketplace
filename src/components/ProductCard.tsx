@@ -65,7 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isAdmin = false, use
       }
       // Otherwise, construct the Supabase storage URL
       const { data } = supabase.storage
-        .from('product-images')
+        .from('listing-images')
         .getPublicUrl(firstImage);
       return data.publicUrl;
     }

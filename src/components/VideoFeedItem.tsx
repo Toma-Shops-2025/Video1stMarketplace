@@ -48,7 +48,7 @@ const VideoFeedItem: React.FC<VideoFeedItemProps> = ({ product, isActive }) => {
       return videoPath;
     }
     const { data } = supabase.storage
-      .from('product-videos')
+      .from('listing-videos')
       .getPublicUrl(videoPath);
     return data.publicUrl;
   };
@@ -58,7 +58,7 @@ const VideoFeedItem: React.FC<VideoFeedItemProps> = ({ product, isActive }) => {
       return thumbnailPath;
     }
     const { data } = supabase.storage
-      .from('product-images')
+      .from('listing-images')
       .getPublicUrl(thumbnailPath);
     return data.publicUrl;
   };

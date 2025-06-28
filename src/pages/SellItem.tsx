@@ -90,8 +90,8 @@ const SellItem = () => {
     // If Allow Shipping is selected and seller IS Stripe onboarded, or if Local Pickup is selected, proceed as normal
     setLoading(true);
     try {
-      const videoUrls = mediaUrls.filter(url => url.includes('product-videos'));
-      const imageUrls = mediaUrls.filter(url => url.includes('product-images'));
+      const videoUrls = mediaUrls.filter(url => url.includes('listing-videos'));
+      const imageUrls = mediaUrls.filter(url => url.includes('listing-images'));
       
       const selectedCategory = categories.find(cat => cat.slug === formData.category);
       
