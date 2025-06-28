@@ -26,12 +26,9 @@ const Checkout = () => {
   const tax = total * 0.08;
   const finalTotal = total + shipping + tax;
 
-  // Update helpers to use allow_shipping and local_pickup_only
-  const allLocal = cartItems.every(item => item.product.local_pickup_only === true);
-  const anyShipped = cartItems.some(item => item.product.allow_shipping === true);
-
-  // Add a fallback for invalid delivery options
-  const invalidDelivery = cartItems.some(item => !item.product.allow_shipping && !item.product.local_pickup_only);
+  const allLocal = cartItems.every(item => item.product.is_shippable === false);
+  const anyShipped = cartItems.some(item => item.product.is_shippable === true);
+  const invalidDelivery = cartItems.some(item => typeof item.product.is_shippable !== 'boolean');
 
   useEffect(() => {
     // Only call backend if there is at least one shipped item
