@@ -9,7 +9,7 @@ A modern e-commerce platform with TikTok-style video feeds, built with React, Ty
 
 ## ✨ Features
 
-- 🛍️ **E-commerce Platform**: Browse and purchase products with ease
+- 🛍️ **E-commerce Platform**: Browse and purchase listings with ease
 - 📱 **Video Feeds**: TikTok-style product showcase videos
 - 👤 **User Authentication**: Secure login and user profiles
 - 🛒 **Shopping Cart**: Add items and seamless checkout
