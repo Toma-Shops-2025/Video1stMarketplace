@@ -125,6 +125,7 @@ const Cart = () => {
   };
 
   const handleCheckout = async () => {
+    console.log('handleCheckout called', { user, cartItems });
     if (!user) {
       toast({
         title: 'Not Logged In',
@@ -133,6 +134,8 @@ const Cart = () => {
       });
       return;
     }
+
+    console.log('Cart items length:', cartItems.length);
 
     if (cartItems.length === 0) {
       toast({
@@ -144,6 +147,11 @@ const Cart = () => {
     }
 
     try {
+      // Log the cart payload before sending to backend
+      console.log('Cart payload for checkout:', {
+        items: cartItems,
+        userId: user.id,
+      });
       const response = await fetch('/.netlify/functions/create-payment-intent', {
         method: 'POST',
         headers: {
