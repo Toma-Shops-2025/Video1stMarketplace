@@ -351,8 +351,8 @@ const SellItem = () => {
                       <LocationPicker onLocationSelect={handleLocationSelect} />
                     </div>
 
-                    {/* Shippable/Local Radio Buttons */}
-                    <div className="space-y-2">
+                    {/* Listing Type */}
+                    <div className="space-y-2 mt-8">
                       <Label>Listing Type</Label>
                       <div className="flex gap-4">
                         <label className="flex items-center gap-2">
