@@ -18,6 +18,7 @@ interface CartItem {
     price: number;
     image_url: string;
     seller_id: string;
+    is_shippable: boolean;
   };
 }
 
@@ -47,12 +48,13 @@ const Cart = () => {
             id,
             product_id,
             quantity,
-            product:products (
+            product:listings (
               id,
               title,
               price,
               image_url,
-              seller_id
+              seller_id,
+              is_shippable
             )
           `)
           .eq('user_id', user.id)
@@ -125,7 +127,6 @@ const Cart = () => {
   };
 
   const handleCheckout = async () => {
-    console.log('handleCheckout called', { user, cartItems });
     if (!user) {
       toast({
         title: 'Not Logged In',
@@ -134,13 +135,20 @@ const Cart = () => {
       });
       return;
     }
-
-    console.log('Cart items length:', cartItems.length);
-
     if (cartItems.length === 0) {
       toast({
         title: 'Empty Cart',
         description: 'Your cart is empty.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    // Check for shippable items
+    const shippableItems = cartItems.filter(item => item.product.is_shippable);
+    if (shippableItems.length === 0) {
+      toast({
+        title: 'No Shippable Items',
+        description: 'No shippable items found in your cart. Please add a shippable item to use online checkout.',
         variant: 'destructive',
       });
       return;
@@ -270,6 +278,18 @@ const Cart = () => {
                       <p className="text-sm text-gray-500">
                         ${item.product.price.toFixed(2)} each
                       </p>
+                      <span
+                        style={{
+                          background: item.product.is_shippable ? '#e0f7fa' : '#ffe0b2',
+                          color: item.product.is_shippable ? '#00796b' : '#bf360c',
+                          borderRadius: 4,
+                          padding: '2px 8px',
+                          fontSize: '0.85em',
+                          marginLeft: 8,
+                        }}
+                      >
+                        {item.product.is_shippable ? 'Shippable' : 'Local Pickup Only'}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button

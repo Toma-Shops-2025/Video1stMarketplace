@@ -24,6 +24,7 @@ interface Product {
   images?: string[];
   status: string;
   created_at: string;
+  is_shippable: boolean;
 }
 
 const ProductDetail: React.FC = () => {
@@ -302,10 +303,22 @@ const ProductDetail: React.FC = () => {
               <div className="md:w-1/2 p-6">
                 <div className="space-y-4">
                   <div>
-                    <h1 className="text-2xl font-bold">{product.title}</h1>
-                    <p className="text-3xl font-bold text-green-600 mt-2">
-                      ${parseFloat(product.price).toFixed(2)}
-                    </p>
+                    <h1 className="text-2xl font-bold mb-2">{product.title}</h1>
+                    {typeof product.is_shippable === 'boolean' && (
+                      <span
+                        style={{
+                          background: product.is_shippable ? '#e0f7fa' : '#ffe0b2',
+                          color: product.is_shippable ? '#00796b' : '#bf360c',
+                          borderRadius: 4,
+                          padding: '2px 8px',
+                          fontSize: '0.95em',
+                          marginLeft: 8,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {product.is_shippable ? 'Shippable' : 'Local Pickup Only'}
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">

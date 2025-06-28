@@ -15,6 +15,7 @@ interface Product {
   images?: string[];
   description: string;
   seller_id?: string;
+  is_shippable?: boolean;
 }
 
 interface ProductCardProps {
@@ -111,6 +112,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isAdmin = false, use
             </span>
           </div>
         </div>
+        {typeof product.is_shippable === 'boolean' && (
+          <span
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              background: product.is_shippable ? 'rgba(0, 150, 136, 0.08)' : 'rgba(255, 152, 0, 0.08)',
+              color: product.is_shippable ? '#009688' : '#FF9800',
+              borderRadius: 4,
+              padding: '2px 8px',
+              fontSize: '0.75em',
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              zIndex: 2,
+            }}
+          >
+            {product.is_shippable ? 'Shippable' : 'Local Only'}
+          </span>
+        )}
       </div>
       <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       {canEditOrDelete && (
