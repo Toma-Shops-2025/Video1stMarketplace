@@ -47,12 +47,10 @@ const SellItem = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!user) {
       setShowAuthModal(true);
       return;
     }
-
     if (!formData.category) {
       toast({ 
         title: 'Category Required', 
@@ -61,7 +59,6 @@ const SellItem = () => {
       });
       return;
     }
-
     if (!formData.location) {
       toast({
         title: 'Location Required',
@@ -70,7 +67,6 @@ const SellItem = () => {
       });
       return;
     }
-
     if (formData.isShippable === null) {
       toast({
         title: 'Listing Type Required',
@@ -79,15 +75,11 @@ const SellItem = () => {
       });
       return;
     }
-
-    // If Allow Shipping is selected and seller is NOT Stripe onboarded, show Stripe modal and message
-    if (!isStripeConnected) {
-      setShowStripeMessage(true);
-      setIsStripeModalOpen(true);
+    // If Allow Shipping is selected and seller is NOT Stripe onboarded, immediately redirect to onboarding
+    if (formData.isShippable && !isStripeConnected) {
+      await proceedToStripeOnboarding();
       return;
     }
-
-    // If Allow Shipping is selected and seller IS Stripe onboarded, or if Local Pickup is selected, proceed as normal
     setLoading(true);
     try {
       const videoUrls = mediaUrls.filter(url => url.includes('listing-videos'));
@@ -379,13 +371,6 @@ const SellItem = () => {
       </AppLayout>
 
       {!user && <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />}
-      <StripeOnboardingModal
-        isOpen={isStripeModalOpen && !isStripeConnected}
-        onConfirm={proceedToStripeOnboarding}
-        onClose={() => setIsStripeModalOpen(false)}
-        loading={isConnectingToStripe}
-        message="To offer shipping, you must connect your Stripe account. You'll be redirected to Stripe to set up payouts for shipped items. Once completed, you'll return here to finish your listing."
-      />
     </>
   );
 };
