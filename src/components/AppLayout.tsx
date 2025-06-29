@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Link, useLocation } from 'react-router-dom';
@@ -25,7 +25,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, showHero = false }) => 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  useEffect(() => {
+    if (user && !user.email_confirmed_at && !user.confirmed_at) {
+      setShowConfirmModal(true);
+      signOut();
+    }
+  }, [user, signOut]);
 
   const handleMenuClick = () => {
     if (isMobile) {
@@ -119,6 +127,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, showHero = false }) => 
       
       {isHomePage && <HowItWorksSection />}
       <Footer />
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+            <h2 className="text-xl font-bold mb-4">Please Confirm Your Email</h2>
+            <p className="mb-4">You must confirm your email address before you can use your account. Please check your inbox for a confirmation link.</p>
+            <Button onClick={() => setShowConfirmModal(false)}>Close</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
