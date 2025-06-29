@@ -38,7 +38,7 @@ const SellItem = () => {
     category: '',
     condition: 'new',
     location: null as { lat: number; lng: number; address: string } | null,
-    isShippable: null as boolean | null,
+    isShippable: true,
   });
 
   const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
@@ -162,7 +162,7 @@ const SellItem = () => {
           category: '', 
           condition: 'new',
           location: null,
-          isShippable: null,
+          isShippable: true,
         });
         setMediaUrls([]);
       } catch (error) {
@@ -352,39 +352,18 @@ const SellItem = () => {
                     </div>
 
                     {/* Listing Type */}
-                    <div className="space-y-2 mt-8">
-                      <Label>Listing Type</Label>
-                      <div className="flex gap-4">
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="listingType"
-                            value="shippable"
-                            checked={formData.isShippable === true}
-                            onChange={() => setFormData({ ...formData, isShippable: true })}
-                            required
-                          />
-                          Shippable (buyer pays online, you ship)
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="listingType"
-                            value="local"
-                            checked={formData.isShippable === false}
-                            onChange={() => setFormData({ ...formData, isShippable: false })}
-                            required
-                          />
-                          Local Pickup Only (buyer pays in person)
-                        </label>
-                      </div>
-                      <div style={{ fontSize: '0.9em', color: '#888', marginTop: 8 }}>
-                        {formData.isShippable === true
-                          ? 'Buyers will pay online and you must ship the item.'
-                          : formData.isShippable === false
-                          ? 'Buyers will pay you in person and pick up the item locally.'
-                          : 'Please select a listing type.'}
-                      </div>
+                    <div className="flex items-center gap-4 mt-8">
+                      <Switch
+                        id="local-pickup-switch"
+                        checked={formData.isShippable === false}
+                        onCheckedChange={checked => setFormData({ ...formData, isShippable: !checked })}
+                      />
+                      <Label htmlFor="local-pickup-switch" className="mb-0">Local Pickup Only</Label>
+                    </div>
+                    <div style={{ fontSize: '0.9em', color: '#888', marginTop: 8, marginBottom: 8 }}>
+                      {formData.isShippable === false
+                        ? 'Buyers will pay you in person and pick up the item locally.'
+                        : 'Buyers will pay online and you must ship the item.'}
                     </div>
 
                     {/* Submit Button */}
